@@ -14,7 +14,7 @@ import (
 
 type Body struct {
 	Challenge   string   `json:"challenge"`
-	Token       string   `json:"token"`
+	Token       string   `json:"token"` // Verification Token
 	TeamID      string   `json:"team_id"`
 	APIAppID    string   `json:"api_app_id"`
 	AuthedUsers []string `json:"authed_users"`
@@ -50,6 +50,7 @@ func ReceiveEvent(w http.ResponseWriter, r *http.Request) {
 
 	if payload.Event.Type == "app_mention" {
 		log.Println(payload.Token)
+		log.Println(payload.TeamID)
 		log.Println(payload.Event.Text)
 		log.Println(payload.Event.User)
 		log.Println(payload.Event.Channel)
@@ -76,7 +77,7 @@ func SendMessage(channel string, text string) {
 	b, _ := json.Marshal(m)
 	req, _ := http.NewRequest("POST", "https://slack.com/api/chat.postMessage", bytes.NewBuffer(b))
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer") // token here
+	req.Header.Add("Authorization", "Bearer") // Bot Token here
 	c := &http.Client{}
 	_, err := c.Do(req)
 	if err != nil {
