@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"html"
 	"log"
+	"math/rand"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type Body struct {
@@ -58,8 +60,13 @@ func ReceiveEvent(w http.ResponseWriter, r *http.Request) {
 			bot := strings.Join([]string{"<@", user, ">"}, "")
 			text = strings.Replace(text, bot, "", -1)
 		}
+		text = strings.TrimSpace(text)
 		log.Println(text)
-		SendMessage(payload.Event.Channel, text)
+		choices := strings.Split(text, " ")
+		log.Printf("%v", choices)
+		rand.Seed(time.Now().Unix())
+		picked := choices[rand.Intn(len(choices))]
+		SendMessage(payload.Event.Channel, picked)
 		return
 	}
 }
