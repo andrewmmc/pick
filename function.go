@@ -7,14 +7,16 @@ import (
 	"html"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type Body struct {
-	Challenge string `json:"challenge"`
-	Token     string `json:"token"`
-	TeamID    string `json:"team_id"`
-	APIAppID  string `json:"api_app_id"`
-	Event     Event
+	Challenge   string   `json:"challenge"`
+	Token       string   `json:"token"`
+	TeamID      string   `json:"team_id"`
+	APIAppID    string   `json:"api_app_id"`
+	AuthedUsers []string `json:"authed_users"`
+	Event       Event
 }
 
 type Event struct {
@@ -25,8 +27,8 @@ type Event struct {
 }
 
 type Message struct {
-	Text    string `json:"text"`
 	Channel string `json:"channel"`
+	Text    string `json:"text"`
 }
 
 func ReceiveEvent(w http.ResponseWriter, r *http.Request) {
@@ -49,25 +51,30 @@ func ReceiveEvent(w http.ResponseWriter, r *http.Request) {
 		log.Println(payload.Event.Text)
 		log.Println(payload.Event.User)
 		log.Println(payload.Event.Channel)
-		SendMessage()
+		log.Printf("%v", payload.AuthedUsers)
+		text := payload.Event.Text
+		// remove bot name from received text
+		for _, user := range payload.AuthedUsers {
+			bot := strings.Join([]string{"<@", user, ">"}, "")
+			text = strings.Replace(text, bot, "", -1)
+		}
+		log.Println(text)
+		SendMessage(payload.Event.Channel, text)
 		return
 	}
 }
 
-func SendMessage() {
-	client := &http.Client{}
-	m := Message{"testing", ""}
+func SendMessage(channel string, text string) {
+	m := Message{channel, text}
 	b, _ := json.Marshal(m)
-	req, err := http.NewRequest("POST", "https://slack.com/api/chat.postMessage", bytes.NewBuffer(b))
+	req, _ := http.NewRequest("POST", "https://slack.com/api/chat.postMessage", bytes.NewBuffer(b))
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer ")
+	req.Header.Add("Authorization", "Bearer") // token here
+	c := &http.Client{}
+	_, err := c.Do(req)
 	if err != nil {
 		log.Println("Error")
 		return
 	}
-	_, err = client.Do(req)
-	if err != nil {
-		log.Println("Error")
-		return
-	}
+	return
 }
