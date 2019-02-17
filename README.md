@@ -3,7 +3,7 @@ Built with [Golang](https://golang.org) and [Google Cloud Functions](https://clo
 
 **Pick** is the best bot to help you making a quick decision from different choices in Slack.
 
-Hard to make a quick decision? Don't want to waste your time to deciding something you don't really care about?
+Hard to make a quick decision? Don't want to waste your time to decide something you don't really care about?
 * Where to go for team lunch?
 * What should we organzie for next team-building activity?
 * Who should be the one to lead this project?
@@ -16,15 +16,24 @@ More features are coming soon, stay tuned!
 For any feedback or support, please email to [pick@andrewmmc.com](pick@andrewmmc.com)
 
 ## Usage
-### /pick [choice1] [choice2] [choice3]...
-Example: `/pick Chicken Pizza Kebab Pasta Rice`
+### /pick [choice] [choice]...
+Example:
 
-**Pick** will answer you the choice from the list you provided. For example, `Pizza` will be returned.
+`/pick Chicken Pizza Kebab Pasta Rice`
+
+`/pick Andrew Ignatius Jake Jay Divya`
+
+**Pick** will answer you the choice from the list you provided.
 
 ### /pick help
-Show help infobox for the command usage.
+Show help infobox for the commands usage.
+
+## Test
+WIP
 
 ## Deploy
+For reference only, basically just install the application on Slack and ignore the below part :)
+
 If you have no latest `gcloud` beta commands installed, run the following:
 ```
 gcloud components update
