@@ -39,15 +39,18 @@ type Attachments struct {
 
 var clientID = os.Getenv("SLACK_APP_CLIENT_ID")
 var clientSecret = os.Getenv("SLACK_APP_CLIENT_SECRET")
+var verificationToken = os.Getenv("SLACK_APP_VERIFICATION_TOKEN")
 var projectID = os.Getenv("PROJECT_ID")
 var redirectURI = "https://" + os.Getenv("FUNCTION_REGION") + "-" + projectID + ".cloudfunctions.net/authCallback"
 
 func Install(w http.ResponseWriter, r *http.Request) {
+	authorizeURL := "https://slack.com/oauth/authorize"
 	scope := "commands"
-	http.Redirect(w, r, "https://slack.com/oauth/authorize?client_id="+clientID+"&scope="+scope+"&redirect_uri="+redirectURI, 302)
+	http.Redirect(w, r, authorizeURL+"?client_id="+clientID+"&scope="+scope+"&redirect_uri="+redirectURI, 302)
 }
 
 func AuthCallback(w http.ResponseWriter, r *http.Request) {
+	accessURL := "https://slack.com/api/oauth.access"
 	q := r.URL.Query()
 	code := q.Get("code")
 	error := q.Get("error")
@@ -64,7 +67,7 @@ func AuthCallback(w http.ResponseWriter, r *http.Request) {
 	form.Add("code", code)
 	form.Add("redirect_uri", redirectURI)
 
-	req, err := http.NewRequest("POST", "https://slack.com/api/oauth.access", strings.NewReader(form.Encode()))
+	req, err := http.NewRequest("POST", accessURL, strings.NewReader(form.Encode()))
 	req.PostForm = form
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
@@ -100,12 +103,13 @@ func GetAnswer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	token := r.FormValue("token")
 	command := r.FormValue("command")
 	userID := r.FormValue("user_id")
 	text := r.FormValue("text")
 	text = strings.TrimSpace(text)
 
-	if command != "/pick" { // TODO: fix
+	if token != verificationToken || command != "/pick" {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
@@ -115,11 +119,15 @@ func GetAnswer(w http.ResponseWriter, r *http.Request) {
 	if text == "" {
 		message = ":wave: Hi, I'm `pick`. Here are some tips to get you started!"
 		attachments = append(attachments, Attachments{"*Basic*\nYou can ask me to randomly pick one choice for you from the list. For example:\n`/pick Chicken Pizza Kebab Pasta Rice`"})
+	} else if text == "help" {
+		message = ":wave: Hi, I'm `pick`. Need some help?"
+		attachments = append(attachments, Attachments{"*Basic*\nYou can ask me to randomly pick one choice for you from the list. For example:\n`/pick Chicken Pizza Kebab Pasta Rice`\nI will pick one from them randomly, and answer you :)"})
+		attachments = append(attachments, Attachments{"*Support*\nIf you need futher support, please email us: pick@andrewmmc.com"})
 	} else {
 		// randomly pick one from the choices received
 		choices := strings.Split(text, " ")
 		rand.Seed(time.Now().Unix())
-		message = "<@" + userID + ">, " + choices[rand.Intn(len(choices))] + "!"
+		message = ":game_die: <@" + userID + ">, " + choices[rand.Intn(len(choices))] + "!"
 	}
 
 	body := Response{"in_channel", message, attachments}
