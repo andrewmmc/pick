@@ -28,8 +28,14 @@ Example:
 ### /pick help
 Show help infobox for the commands usage.
 
+### /dice
+
+### /flip
+
 ## Test
-WIP
+```
+go test
+```
 
 ## Deploy
 For reference only, basically just install the application on Slack and ignore the below part :)
