@@ -43,10 +43,14 @@ var verificationToken = os.Getenv("SLACK_APP_VERIFICATION_TOKEN")
 var projectID = os.Getenv("PROJECT_ID")
 var redirectURI = "https://" + os.Getenv("FUNCTION_REGION") + "-" + projectID + ".cloudfunctions.net/authCallback"
 
+func init() {
+	rand.Seed(time.Now().Unix())
+}
+
 func Install(w http.ResponseWriter, r *http.Request) {
 	authorizeURL := "https://slack.com/oauth/authorize"
 	scope := "commands"
-	http.Redirect(w, r, authorizeURL+"?client_id="+clientID+"&scope="+scope+"&redirect_uri="+redirectURI, 302)
+	http.Redirect(w, r, authorizeURL+"?client_id="+clientID+"&scope="+scope+"&redirect_uri="+redirectURI, http.StatusFound)
 }
 
 func AuthCallback(w http.ResponseWriter, r *http.Request) {
@@ -109,8 +113,13 @@ func GetAnswer(w http.ResponseWriter, r *http.Request) {
 	text := r.FormValue("text")
 	text = strings.TrimSpace(text)
 
-	if token != verificationToken || command != "/pick" {
-		http.Error(w, err.Error(), http.StatusForbidden)
+	if token != verificationToken {
+		http.Error(w, "Error: Invalid token", http.StatusForbidden)
+		return
+	}
+
+	if command != "/pick" {
+		http.Error(w, "Error: Invalid command", http.StatusForbidden)
 		return
 	}
 
@@ -126,8 +135,7 @@ func GetAnswer(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// randomly pick one from the choices received
 		choices := strings.Split(text, " ")
-		rand.Seed(time.Now().Unix())
-		message = ":game_die: <@" + userID + ">, " + choices[rand.Intn(len(choices))] + "!"
+		message = ":game_die: <@" + userID + ">, " + rollChoice(choices) + "!"
 	}
 
 	body := Response{"in_channel", message, attachments}
@@ -142,6 +150,12 @@ func GetAnswer(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
+func rollChoice(choices []string) string {
+	length := len(choices)
+	randIndex := rand.Intn(length)
+	return choices[randIndex]
+}
+
 func createClient(teamID string, teamName string, accessToken string, scope string) {
 	kind := os.Getenv("DATA_STORE_KIND")
 	ctx := context.Background()
@@ -152,7 +166,7 @@ func createClient(teamID string, teamName string, accessToken string, scope stri
 
 	_, err = c.Put(ctx, key, client)
 	if err != nil {
-		log.Fatalf("Failed to save: %v", err)
+		log.Fatalf("Error: Failed to save %v", err)
 	}
 	return
 }
