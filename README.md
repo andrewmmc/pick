@@ -11,9 +11,9 @@ Hard to make a quick decision? Don't want to waste your time to decide something
 
 Simply ask `/pick` to help you picking one from the choices. Even you can use it for **lucky draw**, to see who are in lucky too!
 
-More features are coming soon, stay tuned!
-
-For any feedback or support, please email to [pick@andrewmmc.com](pick@andrewmmc.com)
+```
+Source code only, not available for public installation now.
+```
 
 ## Usage
 ### /pick [choice] [choice]...
@@ -21,45 +21,10 @@ Example:
 
 `/pick Chicken Pizza Kebab Pasta Rice`
 
-`/pick Andrew Ignatius Jake Jay Divya`
-
 **Pick** will answer you the choice from the list you provided.
 
 ### /pick help
 Show help infobox for the commands usage.
 
-### /dice
-
-### /flip
-
-## Test
-```
-go test
-```
-
-## Deploy
-For reference only, basically just install the application on Slack and ignore the below part :)
-
-If you have no latest `gcloud` beta commands installed, run the following:
-```
-gcloud components update
-gcloud components install beta
-```
-
-Given that you installed the latest `gcloud` beta commands,
-```
-gcloud beta functions deploy install --env-vars-file .env.yaml --runtime go111 --entry-point Install --trigger-http --region asia-northeast1
-gcloud beta functions deploy authCallback --env-vars-file .env.yaml --runtime go111 --entry-point AuthCallback --trigger-http --region asia-northeast1
-gcloud beta functions deploy getAnswer --env-vars-file .env.yaml --runtime go111 --entry-point GetAnswer --trigger-http --region asia-northeast1
-```
-
 ## Author
 * [Andrew Mok](https://andrewmmc.com) (@andrewmmc)
-
-## Support
-* Give this repo a **star** if you like :)
-* For any questions, please feel free to [open an issue here](../../issues) or email to [pick@andrewmmc.com](pick@andrewmmc.com).
-
-## Donations
-* We are providing **free service** to support any basic usage from the users, meaning that no charge if you installed this application. 
-* If you would like to support the continuous maintenance of this project, please [**feel free to donate on PayPal**](https://www.paypal.me/andrewmmc). Your donation is highly appreciated, thank you!
